@@ -56,10 +56,13 @@
            (format nil "nop ~A" dot-file) :input "")))
 
 (defun make-image (dot-file layout image-file)
-  (trivial-shell:shell-command
-   (format nil "dot -K~(~A~) -T~(~A~) ~A -o ~A"
-           layout (pathname-type image-file) dot-file image-file)
-   :input "")
+  (let ((multi-return (multiple-value-list (trivial-shell:shell-command
+                                            (format nil "dot -K~(~A~) -T~(~A~) ~A -o ~A"
+                                                    layout (pathname-type image-file) dot-file image-file)
+                                            :input ""))))
+    (if (/= 0 (nth 2 multi-return)) ;If the exit code is non-zero...
+        (progn
+          (log:error "~A" (nth 1 multi-return)))))
   image-file)
 
 (defun show-image (image-file)
@@ -67,7 +70,7 @@
    (format nil "~A ~A" *viewer* image-file) :input ""))
 
 (defmacro $ ((&key (outfile "DONUTS-TMP.png" file?) (layout :dot)
-                   (show t))
+                   (show nil))
              graph)
   (with-gensyms (tmp-name)
     `(let ((,tmp-name ,(str "DONUTS-SHELL-TMP-"

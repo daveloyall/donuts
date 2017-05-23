@@ -63,7 +63,7 @@
   :long-description
   "Donuts is Graphviz interface for common lisp.
 It requires the Graphviz system (http://www.graphviz.org/)."
-  :depends-on (:cl-ppcre :trivial-shell)
+  :depends-on (:cl-ppcre :trivial-shell :log4slime)
   :serial t
   :components ((:file "in-package")
                (:file "cl-utils")

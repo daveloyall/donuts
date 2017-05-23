@@ -35,6 +35,13 @@
       (attrs :accessor :attrs :initarg :attrs :initform nil)
       (body  :accessor :body  :initarg :body  :initform nil)))
 
+(defmethod print-object ((obj tag) stream)
+  (print-unreadable-object (obj stream) ;; put :identity t after stream 
+    (with-slots (name pair? attrs body) obj
+      (format stream "~s ~A~s"
+	      ;; name (if pair? "pair" "single") attrs body))))
+	      name (if attrs attrs "") body))))
+
 (defun tag? (x) (typep x 'tag))
 
 (defun make-tag (name pair? &rest body)
@@ -53,13 +60,17 @@
     (values (nreverse attrs) (nreverse contents))))
 
 (defun print-tag (tag)
-  (with-slots (name body attrs pair?) tag
-     (if pair?
-         (progn
-           (format t "<~A~{ ~A=\"~(~A~)\"~}>" name attrs)
-           (print-body body)
-           (format t "</~A>" name))
-         (format t "<~A~{ ~A=\"~(~A~)\"~}/>" name attrs))))
+  (if (consp tag)
+      (progn
+	(print-tag (car tag))
+	(print-tag (cdr tag)))
+      (with-slots (name body attrs pair?) tag
+	(if pair?
+	    (progn
+	      (format t "<~A~{ ~A=\"~(~A~)\"~}>" name attrs)
+	      (print-body body)
+	      (format t "</~A>" name))
+	    (format t "<~A~{ ~A=\"~(~A~)\"~}/>" name attrs)))))
 
 (defun print-body (body)
   (dolist (elt body)

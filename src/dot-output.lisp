@@ -136,11 +136,21 @@
 ;;--------------------------------------
 (defgeneric output-subgraph (graph))
 
+;; (defmethod output-subgraph ((graph graph))
+;;   (with-slots (buff cache) graph
+;;      (if cache
+;;          (format t "~A" cache)
+;;          (output-buff buff))))
+
 (defmethod output-subgraph ((graph graph))
-  (with-slots (buff cache) graph
+  (with-slots (name attrs buff cache) graph
+     (format t "~&  subgraph ~A {~%" name)
+     (awhen attrs
+       (format t "~&~{  ~A=~A;~^~&~}~&" (escape-attrs it)))
      (if cache
-         (format t "~A" cache)
-         (output-buff buff))))
+         (format t "~A~&  }" cache)
+         (progn (output-buff buff)
+                (format t "~&  }")))))
 
 (defmethod output-subgraph ((cluster cluster))
   (with-slots (name attrs buff cache) cluster
